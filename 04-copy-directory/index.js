@@ -2,29 +2,36 @@ const fs = require('fs');
 const path = require('path');
 
 const oldDir = path.join(__dirname, 'files');
+const newDir = path.join(__dirname, 'files-copy');
 
-
-fs.readdir(oldDir, { withFileTypes: true }, (err, files) => {
+fs.mkdir(newDir, { recursive: true }, (err) => {
     if (err) {
         throw err;
     }
-    fs.mkdir("04-copy-directory/files-copy", { recursive: true }, (err) => {
+});
+
+fs.readdir(newDir, (err, files) => {
+    if (err) {
+        throw err;
+    }
+    
+    files.forEach(file => {
+        fs.unlink(path.join(__dirname, 'files-copy', file), (err) => {
+            if (err) {
+                throw err;
+            }       
+        });
+    });
+    fs.readdir(oldDir, (err, files) => {
         if (err) {
             throw err;
         }
-    });
-    const newDir = path.join(__dirname, 'files-copy');
-    files.forEach((el) => {
-        fs.readFile(`${oldDir}/${el.name}`, (err, data) => {
-            if (err) {
-                throw err;
-            } else {
-                fs.writeFile(`${newDir}/${el.name}`, data, (err) => {
-                    if (err) {
-                        throw err;
-                    }
-                });
-            }
+        files.forEach(file => {
+            fs.copyFile(path.join(__dirname, 'files', file), path.join(__dirname, 'files-copy', file), (err) => {
+                if (err) {
+                    throw err;
+                }
+            });
         });
     });
 });
